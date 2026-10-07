@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0912">
+<meta name="description" content="78张完整塔罗牌在线抽牌工具">
+<title>月隐塔罗 · Tarot</title>
+<style>
+:root{
+  --bg:#0d0912; --panel:#17111e; --panel2:#211728; --line:#3b2b47;
+  --text:#f6f0f8; --muted:#aa9bb1; --accent:#aa82c0; --accent2:#755287;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--text); background:
+  radial-gradient(circle at 50% -10%, #3a2248 0, transparent 35%),
+  radial-gradient(circle at 100% 40%, #241532 0, transparent 28%),
+  var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif;
+  min-height:100vh;
+}
+button,input{font:inherit}
+.app{max-width:720px;margin:0 auto;padding:24px 18px 56px}
+header{text-align:center;padding:28px 0 24px}
+.moon{font-size:30px;opacity:.9;margin-bottom:10px}
+h1{margin:0;font-size:42px;letter-spacing:8px;font-weight:700}
+.subtitle{margin-top:9px;color:var(--muted);font-size:14px;letter-spacing:2px}
+.panel{
+  background:rgba(23,17,30,.88);border:1px solid var(--line);
+  border-radius:22px;padding:20px;margin:14px 0;
+  box-shadow:0 14px 45px rgba(0,0,0,.18);
+}
+.label{display:block;color:#d9cde0;font-size:14px;margin-bottom:14px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{
+  border:1px solid #493651;background:#1a1321;color:#c9bccf;
+  border-radius:999px;padding:10px 15px;cursor:pointer;transition:.2s;
+}
+.chip:hover{border-color:#76558a}
+.chip.active{background:linear-gradient(135deg,#8e67a3,#60436f);border-color:#aa82c0;color:white}
+.range-row{display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.count{min-width:54px;text-align:center;color:#eadff0;font-weight:700}
+.hint{font-size:12px;color:#88798e;line-height:1.7;margin-top:12px}
+.question{
+  width:100%;background:#100c15;border:1px solid #3d2d48;border-radius:14px;
+  color:#fff;padding:14px;outline:none;resize:vertical;min-height:78px;
+}
+.question:focus{border-color:#8d68a2}
+.primary{
+  width:100%;border:0;border-radius:999px;padding:15px 20px;
+  background:linear-gradient(135deg,#ad83c3,#745184);color:#fff;
+  font-weight:700;cursor:pointer;margin-top:8px;box-shadow:0 8px 25px rgba(119,82,132,.25);
+}
+.secondary{
+  border:1px solid #4a3653;background:#1b1421;color:#d8cbdc;
+  border-radius:999px;padding:11px 18px;cursor:pointer;
+}
+.hidden{display:none!important}
+.result-head{text-align:center;margin:12px 0 22px}
+.result-head h2{font-size:28px;margin:0 0 8px}
+.result-head p{color:var(--muted);font-size:13px;margin:0}
+.cards{display:grid;gap:14px}
+.result-card{
+  background:linear-gradient(145deg,#21162a,#151019);
+  border:1px solid #654b74;border-radius:20px;padding:18px;
+  position:relative;overflow:hidden;
+}
+.result-card:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 90% 0,#694b791c,transparent 35%);
+}
+.position{color:#a989b7;font-size:13px;margin-bottom:8px}
+.card-title{font-size:22px;font-weight:700}
+.meta{color:#9f8ea7;font-size:12px;margin-top:5px}
+.orientation{
+  display:inline-block;margin-top:12px;padding:6px 12px;border-radius:999px;
+  background:#47314f;color:#eadff0;font-size:12px;
+}
+.meaning{color:#d9cedd;font-size:14px;line-height:1.8;margin-top:14px}
+.reading{margin-top:24px}
+.reading-title{font-size:17px;font-weight:700;margin-bottom:10px}
+.reading-box{
+  border:1px solid #34263d;background:#130e18;border-radius:16px;
+  padding:15px;color:#cfc2d4;line-height:1.8;font-size:14px;
+}
+.actions{display:flex;gap:10px;margin-top:18px}
+.actions button{flex:1}
+footer{text-align:center;color:#6f6274;font-size:11px;line-height:1.7;margin-top:30px}
+.back{color:#bcaac4;cursor:pointer;display:inline-block;margin-bottom:14px}
+.smallcaps{font-size:11px;color:#776a7c;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="setup">
+    <header>
+      <div class="moon">☾</div>
+      <h1>月隐塔罗</h1>
+      <div class="subtitle">78张完整牌库 · 在线抽牌</div>
+    </header>
+
+    <div class="panel">
+      <span class="label">选择牌阵</span>
+      <div class="chips" id="spreadChips"></div>
+    </div>
+
+    <div class="panel">
+      <span class="label">抽牌数量</span>
+      <div class="range-row">
+        <input id="countRange" type="range" min="1" max="10" value="3">
+        <span class="count" id="countText">3 张</span>
+      </div>
+      <div class="hint" id="spreadHint">选择牌阵后会自动设置推荐张数；也可以自由调整为 1–10 张。</div>
+    </div>
+
+    <div class="panel">
+      <span class="label">你想问什么？（可选）</span>
+      <textarea id="question" class="question" placeholder="例如：我和某个人未来三个月的关系会怎样？"></textarea>
+      <div class="hint">问题越具体，越适合作为自我反思的主题。塔罗结果仅供娱乐与自我探索。</div>
+    </div>
+
+    <button class="primary" id="drawBtn">开始抽牌</button>
+  </section>
+
+  <section id="result" class="hidden">
+    <div class="back" id="backBtn">‹ 重新选择</div>
+    <div class="result-head">
+      <div class="smallcaps">YOUR READING</div>
+      <h2 id="resultTitle"></h2>
+      <p id="resultQuestion"></p>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="reading">
+      <div class="reading-title">本次抽牌</div>
+      <div class="reading-box" id="summary"></div>
+    </div>
+    <div class="actions">
+      <button class="secondary" id="againBtn">再抽一次</button>
+      <button class="secondary" id="shareBtn">复制结果</button>
+    </div>
+  </section>
+
+  <footer>
+    月隐塔罗 · 78张牌随机抽取<br>
+    本工具用于娱乐与自我反思，不构成医疗、法律、财务或其他专业建议。
+  </footer>
+</div>
+
+<script>
+const CARDS = [{"id": 0, "name": "愚人", "arcana": "大阿尔卡那", "number": "0", "upright": "新的开始、自由、冒险", "reversed": "冲动、鲁莽、缺乏准备"}, {"id": 1, "name": "魔术师", "arcana": "大阿尔卡那", "number": "I", "upright": "行动力、创造力、资源", "reversed": "欺骗、操控、能力未发挥"}, {"id": 2, "name": "女祭司", "arcana": "大阿尔卡那", "number": "II", "upright": "直觉、内在智慧、神秘", "reversed": "压抑直觉、秘密、被动"}, {"id": 3, "name": "皇后", "arcana": "大阿尔卡那", "number": "III", "upright": "丰盛、滋养、创造、爱", "reversed": "过度依赖、停滞、缺乏自我照顾"}, {"id": 4, "name": "皇帝", "arcana": "大阿尔卡那", "number": "IV", "upright": "秩序、稳定、权威、责任", "reversed": "控制欲、僵化、专横"}, {"id": 5, "name": "教皇", "arcana": "大阿尔卡那", "number": "V", "upright": "传统、信念、学习、指引", "reversed": "教条、束缚、盲从"}, {"id": 6, "name": "恋人", "arcana": "大阿尔卡那", "number": "VI", "upright": "选择、关系、吸引、价值一致", "reversed": "犹豫、失衡、价值冲突"}, {"id": 7, "name": "战车", "arcana": "大阿尔卡那", "number": "VII", "upright": "前进、意志、胜利、掌控", "reversed": "失控、方向混乱、急躁"}, {"id": 8, "name": "力量", "arcana": "大阿尔卡那", "number": "VIII", "upright": "勇气、耐心、温柔的力量", "reversed": "自我怀疑、情绪失控、软弱"}, {"id": 9, "name": "隐士", "arcana": "大阿尔卡那", "number": "IX", "upright": "独处、反思、寻找答案", "reversed": "孤立、逃避、封闭"}, {"id": 10, "name": "命运之轮", "arcana": "大阿尔卡那", "number": "X", "upright": "转机、周期、机会、变化", "reversed": "抗拒变化、反复、失去掌控"}, {"id": 11, "name": "正义", "arcana": "大阿尔卡那", "number": "XI", "upright": "公平、因果、真相、决定", "reversed": "不公平、逃避责任、偏见"}, {"id": 12, "name": "倒吊人", "arcana": "大阿尔卡那", "number": "XII", "upright": "暂停、换位思考、放下", "reversed": "拖延、无谓牺牲、抗拒改变"}, {"id": 13, "name": "死神", "arcana": "大阿尔卡那", "number": "XIII", "upright": "结束、转化、重生", "reversed": "抗拒结束、停滞、无法放下"}, {"id": 14, "name": "节制", "arcana": "大阿尔卡那", "number": "XIV", "upright": "平衡、调和、耐心、融合", "reversed": "失衡、极端、缺乏节制"}, {"id": 15, "name": "恶魔", "arcana": "大阿尔卡那", "number": "XV", "upright": "欲望、依恋、诱惑、束缚", "reversed": "挣脱、觉醒、摆脱依赖"}, {"id": 16, "name": "高塔", "arcana": "大阿尔卡那", "number": "XVI", "upright": "突变、真相、旧结构崩塌", "reversed": "抗拒改变、延迟爆发、恐惧"}, {"id": 17, "name": "星星", "arcana": "大阿尔卡那", "number": "XVII", "upright": "希望、疗愈、信心、未来", "reversed": "失望、怀疑、缺乏信念"}, {"id": 18, "name": "月亮", "arcana": "大阿尔卡那", "number": "XVIII", "upright": "潜意识、直觉、迷雾、不确定", "reversed": "迷雾消散、真相浮现、恐惧减少"}, {"id": 19, "name": "太阳", "arcana": "大阿尔卡那", "number": "XIX", "upright": "快乐、成功、清晰、生命力", "reversed": "短暂低落、过度乐观、延迟的喜悦"}, {"id": 20, "name": "审判", "arcana": "大阿尔卡那", "number": "XX", "upright": "觉醒、复盘、召唤、重新选择", "reversed": "逃避审视、自我否定、无法释怀"}, {"id": 21, "name": "世界", "arcana": "大阿尔卡那", "number": "XXI", "upright": "完成、圆满、整合、新阶段", "reversed": "未完成、循环未闭合、停滞"}, {"id": 22, "name": "权杖Ace", "arcana": "小阿尔卡那", "number": "", "upright": "权杖王牌：新的行动机会、潜力、种子", "reversed": "权杖王牌逆位：机会受阻、能量未启动、缺乏信心"}, {"id": 23, "name": "权杖二", "arcana": "小阿尔卡那", "number": "", "upright": "权杖二：选择、平衡、合作", "reversed": "权杖二逆位：选择、平衡、合作受阻、过度或失衡"}, {"id": 24, "name": "权杖三", "arcana": "小阿尔卡那", "number": "", "upright": "权杖三：成长、表达、成果", "reversed": "权杖三逆位：成长、表达、成果受阻、过度或失衡"}, {"id": 25, "name": "权杖四", "arcana": "小阿尔卡那", "number": "", "upright": "权杖四：稳定、基础、停顿", "reversed": "权杖四逆位：稳定、基础、停顿受阻、过度或失衡"}, {"id": 26, "name": "权杖五", "arcana": "小阿尔卡那", "number": "", "upright": "权杖五：变化、冲突、挑战", "reversed": "权杖五逆位：变化、冲突、挑战受阻、过度或失衡"}, {"id": 27, "name": "权杖六", "arcana": "小阿尔卡那", "number": "", "upright": "权杖六：调整、帮助、过渡", "reversed": "权杖六逆位：调整、帮助、过渡受阻、过度或失衡"}, {"id": 28, "name": "权杖七", "arcana": "小阿尔卡那", "number": "", "upright": "权杖七：考验、防守、评估", "reversed": "权杖七逆位：考验、防守、评估受阻、过度或失衡"}, {"id": 29, "name": "权杖八", "arcana": "小阿尔卡那", "number": "", "upright": "权杖八：快速发展、技能、行动", "reversed": "权杖八逆位：快速发展、技能、行动受阻、过度或失衡"}, {"id": 30, "name": "权杖九", "arcana": "小阿尔卡那", "number": "", "upright": "权杖九：坚持、成果、边界", "reversed": "权杖九逆位：坚持、成果、边界受阻、过度或失衡"}, {"id": 31, "name": "权杖十", "arcana": "小阿尔卡那", "number": "", "upright": "权杖十：完成、压力、阶段结束", "reversed": "权杖十逆位：完成、压力、阶段结束受阻、过度或失衡"}, {"id": 32, "name": "权杖侍者", "arcana": "小阿尔卡那", "number": "", "upright": "权杖侍者：好奇、消息、学习、新鲜能量", "reversed": "权杖侍者逆位：消息延迟、浮躁、缺乏方向"}, {"id": 33, "name": "权杖骑士", "arcana": "小阿尔卡那", "number": "", "upright": "权杖骑士：行动、推进、追求目标", "reversed": "权杖骑士逆位：冲动、停滞、行动失衡"}, {"id": 34, "name": "权杖王后", "arcana": "小阿尔卡那", "number": "", "upright": "权杖王后：成熟、滋养、掌握内在力量", "reversed": "权杖王后逆位：情绪失衡、过度付出、缺乏安全感"}, {"id": 35, "name": "权杖国王", "arcana": "小阿尔卡那", "number": "", "upright": "权杖国王：成熟、掌控、稳定、领导", "reversed": "权杖国王逆位：控制、固执、权力失衡"}, {"id": 36, "name": "圣杯Ace", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯王牌：新的情感机会、潜力、种子", "reversed": "圣杯王牌逆位：机会受阻、能量未启动、缺乏信心"}, {"id": 37, "name": "圣杯二", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯二：选择、平衡、合作", "reversed": "圣杯二逆位：选择、平衡、合作受阻、过度或失衡"}, {"id": 38, "name": "圣杯三", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯三：成长、表达、成果", "reversed": "圣杯三逆位：成长、表达、成果受阻、过度或失衡"}, {"id": 39, "name": "圣杯四", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯四：稳定、基础、停顿", "reversed": "圣杯四逆位：稳定、基础、停顿受阻、过度或失衡"}, {"id": 40, "name": "圣杯五", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯五：变化、冲突、挑战", "reversed": "圣杯五逆位：变化、冲突、挑战受阻、过度或失衡"}, {"id": 41, "name": "圣杯六", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯六：调整、帮助、过渡", "reversed": "圣杯六逆位：调整、帮助、过渡受阻、过度或失衡"}, {"id": 42, "name": "圣杯七", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯七：考验、防守、评估", "reversed": "圣杯七逆位：考验、防守、评估受阻、过度或失衡"}, {"id": 43, "name": "圣杯八", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯八：快速发展、技能、行动", "reversed": "圣杯八逆位：快速发展、技能、行动受阻、过度或失衡"}, {"id": 44, "name": "圣杯九", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯九：坚持、成果、边界", "reversed": "圣杯九逆位：坚持、成果、边界受阻、过度或失衡"}, {"id": 45, "name": "圣杯十", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯十：完成、压力、阶段结束", "reversed": "圣杯十逆位：完成、压力、阶段结束受阻、过度或失衡"}, {"id": 46, "name": "圣杯侍者", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯侍者：好奇、消息、学习、新鲜能量", "reversed": "圣杯侍者逆位：消息延迟、浮躁、缺乏方向"}, {"id": 47, "name": "圣杯骑士", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯骑士：行动、推进、追求目标", "reversed": "圣杯骑士逆位：冲动、停滞、行动失衡"}, {"id": 48, "name": "圣杯王后", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯王后：成熟、滋养、掌握内在力量", "reversed": "圣杯王后逆位：情绪失衡、过度付出、缺乏安全感"}, {"id": 49, "name": "圣杯国王", "arcana": "小阿尔卡那", "number": "", "upright": "圣杯国王：成熟、掌控、稳定、领导", "reversed": "圣杯国王逆位：控制、固执、权力失衡"}, {"id": 50, "name": "宝剑Ace", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑王牌：新的思想机会、潜力、种子", "reversed": "宝剑王牌逆位：机会受阻、能量未启动、缺乏信心"}, {"id": 51, "name": "宝剑二", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑二：选择、平衡、合作", "reversed": "宝剑二逆位：选择、平衡、合作受阻、过度或失衡"}, {"id": 52, "name": "宝剑三", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑三：成长、表达、成果", "reversed": "宝剑三逆位：成长、表达、成果受阻、过度或失衡"}, {"id": 53, "name": "宝剑四", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑四：稳定、基础、停顿", "reversed": "宝剑四逆位：稳定、基础、停顿受阻、过度或失衡"}, {"id": 54, "name": "宝剑五", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑五：变化、冲突、挑战", "reversed": "宝剑五逆位：变化、冲突、挑战受阻、过度或失衡"}, {"id": 55, "name": "宝剑六", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑六：调整、帮助、过渡", "reversed": "宝剑六逆位：调整、帮助、过渡受阻、过度或失衡"}, {"id": 56, "name": "宝剑七", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑七：考验、防守、评估", "reversed": "宝剑七逆位：考验、防守、评估受阻、过度或失衡"}, {"id": 57, "name": "宝剑八", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑八：快速发展、技能、行动", "reversed": "宝剑八逆位：快速发展、技能、行动受阻、过度或失衡"}, {"id": 58, "name": "宝剑九", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑九：坚持、成果、边界", "reversed": "宝剑九逆位：坚持、成果、边界受阻、过度或失衡"}, {"id": 59, "name": "宝剑十", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑十：完成、压力、阶段结束", "reversed": "宝剑十逆位：完成、压力、阶段结束受阻、过度或失衡"}, {"id": 60, "name": "宝剑侍者", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑侍者：好奇、消息、学习、新鲜能量", "reversed": "宝剑侍者逆位：消息延迟、浮躁、缺乏方向"}, {"id": 61, "name": "宝剑骑士", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑骑士：行动、推进、追求目标", "reversed": "宝剑骑士逆位：冲动、停滞、行动失衡"}, {"id": 62, "name": "宝剑王后", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑王后：成熟、滋养、掌握内在力量", "reversed": "宝剑王后逆位：情绪失衡、过度付出、缺乏安全感"}, {"id": 63, "name": "宝剑国王", "arcana": "小阿尔卡那", "number": "", "upright": "宝剑国王：成熟、掌控、稳定、领导", "reversed": "宝剑国王逆位：控制、固执、权力失衡"}, {"id": 64, "name": "星币Ace", "arcana": "小阿尔卡那", "number": "", "upright": "星币王牌：新的现实机会、潜力、种子", "reversed": "星币王牌逆位：机会受阻、能量未启动、缺乏信心"}, {"id": 65, "name": "星币二", "arcana": "小阿尔卡那", "number": "", "upright": "星币二：选择、平衡、合作", "reversed": "星币二逆位：选择、平衡、合作受阻、过度或失衡"}, {"id": 66, "name": "星币三", "arcana": "小阿尔卡那", "number": "", "upright": "星币三：成长、表达、成果", "reversed": "星币三逆位：成长、表达、成果受阻、过度或失衡"}, {"id": 67, "name": "星币四", "arcana": "小阿尔卡那", "number": "", "upright": "星币四：稳定、基础、停顿", "reversed": "星币四逆位：稳定、基础、停顿受阻、过度或失衡"}, {"id": 68, "name": "星币五", "arcana": "小阿尔卡那", "number": "", "upright": "星币五：变化、冲突、挑战", "reversed": "星币五逆位：变化、冲突、挑战受阻、过度或失衡"}, {"id": 69, "name": "星币六", "arcana": "小阿尔卡那", "number": "", "upright": "星币六：调整、帮助、过渡", "reversed": "星币六逆位：调整、帮助、过渡受阻、过度或失衡"}, {"id": 70, "name": "星币七", "arcana": "小阿尔卡那", "number": "", "upright": "星币七：考验、防守、评估", "reversed": "星币七逆位：考验、防守、评估受阻、过度或失衡"}, {"id": 71, "name": "星币八", "arcana": "小阿尔卡那", "number": "", "upright": "星币八：快速发展、技能、行动", "reversed": "星币八逆位：快速发展、技能、行动受阻、过度或失衡"}, {"id": 72, "name": "星币九", "arcana": "小阿尔卡那", "number": "", "upright": "星币九：坚持、成果、边界", "reversed": "星币九逆位：坚持、成果、边界受阻、过度或失衡"}, {"id": 73, "name": "星币十", "arcana": "小阿尔卡那", "number": "", "upright": "星币十：完成、压力、阶段结束", "reversed": "星币十逆位：完成、压力、阶段结束受阻、过度或失衡"}, {"id": 74, "name": "星币侍者", "arcana": "小阿尔卡那", "number": "", "upright": "星币侍者：好奇、消息、学习、新鲜能量", "reversed": "星币侍者逆位：消息延迟、浮躁、缺乏方向"}, {"id": 75, "name": "星币骑士", "arcana": "小阿尔卡那", "number": "", "upright": "星币骑士：行动、推进、追求目标", "reversed": "星币骑士逆位：冲动、停滞、行动失衡"}, {"id": 76, "name": "星币王后", "arcana": "小阿尔卡那", "number": "", "upright": "星币王后：成熟、滋养、掌握内在力量", "reversed": "星币王后逆位：情绪失衡、过度付出、缺乏安全感"}, {"id": 77, "name": "星币国王", "arcana": "小阿尔卡那", "number": "", "upright": "星币国王：成熟、掌控、稳定、领导", "reversed": "星币国王逆位：控制、固执、权力失衡"}];
+const SPREADS = {"single": {"name": "单牌", "positions": ["当前指引"]}, "three": {"name": "时间三牌", "positions": ["过去", "现在", "未来"]}, "relation": {"name": "关系三牌", "positions": ["我的状态", "对方 / 关系能量", "关系走向"]}, "decision": {"name": "选择五牌", "positions": ["现状", "选项 A", "选项 B", "隐藏因素", "建议"]}, "celtic": {"name": "凯尔特十字", "positions": ["现状", "阻碍", "根源", "过去", "可能的未来", "近期发展", "自我状态", "外部环境", "希望与恐惧", "最终趋势"]}};
+
+const state={spreadKey:"three",count:3,result:[]};
+const $=id=>document.getElementById(id);
+
+function renderSpreads(){
+  const box=$("spreadChips");
+  box.innerHTML="";
+  Object.entries(SPREADS).forEach(([key,s])=>{
+    const b=document.createElement("button");
+    b.className="chip"+(key===state.spreadKey?" active":"");
+    b.textContent=s.name;
+    b.onclick=()=>{
+      state.spreadKey=key;
+      state.count=s.positions.length;
+      $("countRange").value=state.count;
+      $("countText").textContent=state.count+" 张";
+      renderSpreads();
+    };
+    box.appendChild(b);
+  });
+}
+$("countRange").addEventListener("input",e=>{
+  state.count=Number(e.target.value);
+  state.spreadKey="custom";
+  $("countText").textContent=state.count+" 张";
+  renderSpreads();
+});
+function shufflePick(n){
+  const pool=[...CARDS], out=[];
+  for(let i=0;i<n;i++){
+    const idx=Math.floor(Math.random()*pool.length);
+    const card=pool.splice(idx,1)[0];
+    const reversed=Math.random()<.5;
+    out.push({...card,reversed,orientation:reversed?"逆位":"正位",meaning:reversed?card.reversed:card.upright});
+  }
+  return out;
+}
+function getSpread(){
+  if(state.spreadKey==="custom"){
+    return {name:"自定义抽牌",positions:Array.from({length:state.count},(_,i)=>"第"+(i+1)+"张")};
+  }
+  return SPREADS[state.spreadKey];
+}
+function makeSummary(cards,spread,question){
+  const up=cards.filter(c=>!c.reversed).length, rev=cards.length-up;
+  let text=`本次共抽到 ${cards.length} 张牌，其中正位 ${up} 张、逆位 ${rev} 张。`;
+  if(question.trim()) text+=` 你提出的主题是：“${question.trim()}”。`;
+  text+=" 你可以把每张牌的关键词与对应位置结合起来观察，而不是把单张牌当成绝对预言。";
+  return text;
+}
+function showResult(){
+  const spread=getSpread(), question=$("question").value;
+  state.result=shufflePick(state.count);
+  $("resultTitle").textContent=spread.name;
+  $("resultQuestion").textContent=question.trim()?`问题：${question.trim()}`:"愿你从牌面里找到值得思考的角度";
+  const box=$("cards"); box.innerHTML="";
+  state.result.forEach((c,i)=>{
+    const el=document.createElement("article");
+    el.className="result-card";
+    const position=spread.positions[i]||("第"+(i+1)+"张");
+    el.innerHTML=`
+      <div class="position">${position}</div>
+      <div class="card-title">${c.number?c.number+" ":""}${c.name}</div>
+      <div class="meta">${c.arcana}</div>
+      <span class="orientation">${c.orientation}</span>
+      <div class="meaning">${c.meaning}</div>`;
+    box.appendChild(el);
+  });
+  $("summary").textContent=makeSummary(state.result,spread,question);
+  $("setup").classList.add("hidden");
+  $("result").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+  localStorage.setItem("tarot-last",JSON.stringify({state,question}));
+}
+function reset(){
+  $("result").classList.add("hidden");
+  $("setup").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("drawBtn").onclick=showResult;
+$("againBtn").onclick=showResult;
+$("backBtn").onclick=reset;
+$("shareBtn").onclick=async()=>{
+  const spread=getSpread(), q=$("question").value.trim();
+  const lines=state.result.map((c,i)=>`${spread.positions[i]||"第"+(i+1)+"张"}：${c.name}（${c.orientation}）`);
+  const text=`月隐塔罗｜${spread.name}\n${q?`问题：${q}\n`:""}${lines.join("\n")}`;
+  try{await navigator.clipboard.writeText(text);$("shareBtn").textContent="已复制";setTimeout(()=>$("shareBtn").textContent="复制结果",1400)}
+  catch(e){prompt("复制以下结果：",text)}
+};
+renderSpreads();
+</script>
+</body>
+</html>
